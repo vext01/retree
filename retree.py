@@ -3,21 +3,24 @@ import os, sys, re
 
 class ReTreeError(Exception): pass
 
-def do_rename(path, re_pairs):
-    new_name = path
+def do_rename(direc, filename, re_pairs):
+    new_filename = filename
     for (re, repl) in re_pairs:
-        new_name = re.sub(repl, new_name)
+        new_filename = re.sub(repl, new_filename)
 
-    if new_name != path:
-        print("%s -> %s" % (path, new_name))
-        os.rename(path, new_name)
+    if new_filename != filename:
+        oldp, newp = (
+                os.path.join(direc, filename),
+                os.path.join(direc, new_filename))
+
+        print("%s -> %s" % (oldp, newp))
+        os.rename(oldp, newp)
+    return new_filename
 
 def recurse(path, re_pairs):
-    for i in os.listdir(path):
-        do_rename(os.path.join(path, i), re_pairs)
+    renamed_files = [ do_rename(path, i, re_pairs) for i in os.listdir(path) ]
 
-    # reread, since the filenames could have changed
-    for i in os.listdir(path):
+    for i in renamed_files:
         full_path = os.path.join(path, i)
         if os.path.isdir(full_path):
             recurse(full_path, re_pairs)
