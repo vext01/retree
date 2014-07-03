@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-import os, sys, re
 
-class ReTreeError(Exception): pass
+import os, sys, re
 
 def do_rename(direc, filename, re_pairs):
     new_filename = filename
@@ -42,8 +41,12 @@ def entry_point():
     re_pairs = [ (re.compile(regexs[i*2]), regexs[i*2+1]) for
             i in range(int(len(regexs) / 2)) ]
 
-    os.chdir(start_path)
-    recurse(".", re_pairs)
+    if not os.path.isdir(start_path):
+        do_rename(os.path.dirname(start_path),
+                os.path.basename(start_path), re_pairs)
+    else:
+        os.chdir(start_path)
+        recurse(".", re_pairs)
 
 if __name__ == "__main__":
     entry_point()
