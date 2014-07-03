@@ -30,8 +30,6 @@ def usage():
         sys.exit(1)
 
 def entry_point():
-    # XXX read regex from commandline
-
     try:
         start_path = sys.argv[1]
     except IndexError:
