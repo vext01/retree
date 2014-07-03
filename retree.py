@@ -4,7 +4,6 @@ import os, sys, re
 class ReTreeError(Exception): pass
 
 def do_rename(path, re_pairs):
-    # XXX just lowercases for now
     new_name = path
     for (re, repl) in re_pairs:
         new_name = re.sub(repl, new_name)
@@ -24,7 +23,7 @@ def recurse(path, re_pairs):
             recurse(full_path, re_pairs)
 
 def usage():
-        print("usage: retree <start_path> <pat_!> <repl_1> ... <pat_n> <repl_n>")
+        print("usage: retree <start_path> <pat_1> <repl_1> ... <pat_n> <repl_n>")
         sys.exit(1)
 
 def entry_point():
