@@ -44,7 +44,7 @@ def recurse(path, config):
             recurse(full_path, config)
 
 def usage():
-        print("usage: retree <start_path> <pat_1> <repl_1> ... <pat_n> <repl_n>")
+        print("usage: retree <start_path> [-l]/[-u]/[<pat_1> <repl_1> ... <pat_n> <repl_n>]")
         sys.exit(1)
 
 class Config:
