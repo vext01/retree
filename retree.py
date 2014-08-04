@@ -15,9 +15,15 @@
 
 import os, sys, re
 
-def do_rename(direc, filename, re_pairs):
+def do_rename(direc, filename, config):
     new_filename = filename
-    for (re, repl) in re_pairs:
+
+    if config.case == "l":
+        new_filename = new_filename.lower()
+    elif config.case == "u":
+        new_filename = new_filename.upper()
+
+    for (re, repl) in config.re_pairs:
         new_filename = re.sub(repl, new_filename)
 
     if new_filename != filename:
@@ -29,17 +35,22 @@ def do_rename(direc, filename, re_pairs):
         os.rename(oldp, newp)
     return new_filename
 
-def recurse(path, re_pairs):
-    renamed_files = [ do_rename(path, i, re_pairs) for i in os.listdir(path) ]
+def recurse(path, config):
+    renamed_files = [ do_rename(path, i, config) for i in os.listdir(path) ]
 
     for i in renamed_files:
         full_path = os.path.join(path, i)
         if os.path.isdir(full_path):
-            recurse(full_path, re_pairs)
+            recurse(full_path, config)
 
 def usage():
         print("usage: retree <start_path> <pat_1> <repl_1> ... <pat_n> <repl_n>")
         sys.exit(1)
+
+class Config:
+    def __init__(self):
+        self.re_pairs = []
+        self.case = None # 'l'/'u'/None
 
 def entry_point():
     try:
@@ -47,19 +58,28 @@ def entry_point():
     except IndexError:
         usage()
 
-    regexs = sys.argv[2:]
-    if not regexs or len(regexs) % 2 != 0:
-        usage()
+    rest = sys.argv[2:]
+    config = Config()
 
-    re_pairs = [ (re.compile(regexs[i*2]), regexs[i*2+1]) for
-            i in range(int(len(regexs) / 2)) ]
+    # Add argparse so we can change case and do regex on one invokation XXX
+    if len(rest) == 1:
+        if rest[0] in ["-l", "-u"]:
+            config.case = rest[0][1]
+        else:
+            usage()
+    else:
+        if not rest or len(rest) % 2 != 0:
+            usage()
+
+        config.re_pairs = [ (re.compile(rest[i*2]), rest[i*2+1]) for
+                i in range(int(len(rest) / 2)) ]
 
     if not os.path.isdir(start_path):
         do_rename(os.path.dirname(start_path),
                 os.path.basename(start_path), re_pairs)
     else:
         os.chdir(start_path)
-        recurse(".", re_pairs)
+        recurse(".", config)
 
 if __name__ == "__main__":
     entry_point()
